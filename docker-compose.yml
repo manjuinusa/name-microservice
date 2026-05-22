@@ -1,0 +1,27 @@
+services:
+  name-service:
+    build: ./name-service
+    container_name: name-service
+    environment:
+      - PORT=8081
+    ports:
+      - "8081:8081"
+    networks:
+      - app-net
+
+  web-service:
+    build: ./web-service
+    container_name: web-service
+    environment:
+      - PORT=8080
+      - NAME_SERVICE_URL=http://name-service:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - name-service
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge

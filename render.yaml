@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: name-service
+    runtime: docker
+    plan: free
+    rootDir: name-service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/names/health
+
+  - type: web
+    name: web-service
+    runtime: docker
+    plan: free
+    rootDir: web-service
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      # Set this to the PUBLIC URL of name-service after the first deploy,
+      # e.g. https://name-service-xxxx.onrender.com
+      - key: NAME_SERVICE_URL
+        sync: false
