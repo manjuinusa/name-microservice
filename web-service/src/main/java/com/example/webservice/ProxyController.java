@@ -42,6 +42,21 @@ public class ProxyController {
         }
     }
 
+    @GetMapping("/list")
+    public ResponseEntity<?> list() {
+        try {
+            Object response = webClient.get()
+                    .uri(nameServiceUrl + "/api/names")
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(502)
+                    .body(Map.of("error", "name-service unreachable: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/health")
     public Map<String, String> health() {
         return Map.of("status", "UP", "service", "web-service");

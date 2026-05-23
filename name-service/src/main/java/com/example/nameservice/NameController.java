@@ -6,11 +6,17 @@ import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/names")
 public class NameController {
+
+    private final NameRepository repository;
+
+    public NameController(NameRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/health")
     public Health health() {
@@ -19,15 +25,28 @@ public class NameController {
 
     @PostMapping
     public NameResponse submit(@Valid @RequestBody NameRequest request) {
-        String fullName = (request.firstName().trim() + " " + request.lastName().trim()).trim();
-        String greeting = "Hello, " + fullName + "!";
+        Name entity = new Name();
+        entity.setFirstName(request.firstName().trim());
+        entity.setLastName(request.lastName().trim());
+        entity.setCreatedAt(Instant.now());
+        Name saved = repository.save(entity);
+        return toResponse(saved);
+    }
+
+    @GetMapping
+    public List<NameResponse> list() {
+        return repository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    private NameResponse toResponse(Name n) {
+        String fullName = n.getFirstName() + " " + n.getLastName();
         return new NameResponse(
-                UUID.randomUUID().toString(),
-                request.firstName().trim(),
-                request.lastName().trim(),
+                n.getId().toString(),
+                n.getFirstName(),
+                n.getLastName(),
                 fullName,
-                greeting,
-                Instant.now().toString()
+                "Hello, " + fullName + "!",
+                n.getCreatedAt().toString()
         );
     }
 

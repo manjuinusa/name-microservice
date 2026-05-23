@@ -77,6 +77,10 @@
         <button type="submit" id="submitBtn">Submit</button>
     </form>
 
+    <button type="button" id="listBtn" style="margin-top:8px; background:#fff; color:#667eea; border:1px solid #667eea;">
+        Show all stored names
+    </button>
+
     <div id="result" class="result"></div>
 </div>
 
@@ -84,6 +88,33 @@
     const form = document.getElementById('form');
     const result = document.getElementById('result');
     const btn = document.getElementById('submitBtn');
+    const listBtn = document.getElementById('listBtn');
+
+    listBtn.addEventListener('click', async () => {
+        result.className = 'result';
+        result.textContent = '';
+        listBtn.disabled = true;
+        listBtn.textContent = 'Loading...';
+        try {
+            const res = await fetch('/api/list');
+            const data = await res.json();
+            if (res.ok) {
+                result.classList.add('success');
+                const count = Array.isArray(data) ? data.length : 0;
+                result.innerHTML = '<strong>' + count + ' name(s) stored</strong>'
+                    + '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } else {
+                result.classList.add('error');
+                result.textContent = 'Error: ' + (data.error || res.statusText);
+            }
+        } catch (err) {
+            result.classList.add('error');
+            result.textContent = 'Network error: ' + err.message;
+        } finally {
+            listBtn.disabled = false;
+            listBtn.textContent = 'Show all stored names';
+        }
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
